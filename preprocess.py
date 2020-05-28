@@ -56,7 +56,7 @@ def pre_processing(df: DataFrame):
     """
     input : a data frame
     outputs: clean data frame
-            dtypes.txt : a file that has type of each columns
+            dtype.txt : a file that has type of each columns
             database:information.sqlite
             tables:
                  information  : clean data frame
