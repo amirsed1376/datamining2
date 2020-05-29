@@ -20,11 +20,15 @@ def drop_numerical_outliers(input_df):
     """
     outliers_index = set()
     for header in input_df.columns:
+        print(header," checked")
         df = input_df[header]
         if df.dtype == "int64":
+            mean=df.mean()
             Q1 = df.quantile(0.25)
             Q3 = df.quantile(0.75)
             IQR = Q3 - Q1
+            if IQR == 0:
+                continue
             trueList = ~((df < (Q1 - 1.5 * IQR)) | (df > (Q3 + 1.5 * IQR)))
             for index, is_ok in enumerate(trueList.values.tolist()):
                 if not is_ok:
@@ -40,13 +44,14 @@ def drop_numerical_outliers(input_df):
         else:
             main_list.append(list(values[i]))
     outliers_df = DataFrame(outliers_list,
-                            columns=['age', 'workclass', 'fnlwgt', 'education_num', 'marital_status', 'post',
-                                     'relationship', 'nation', 'gender', 'capital', 'hours_per_week',
+                            columns=['age', 'workclass', 'education_num', 'marital_status', 'post',
+                                     'relationship', 'nation', 'gender', 'capital_gain', 'capital_loss',
+                                     'hours_per_week',
                                      'country', 'wealth'])
 
     main_df = DataFrame(main_list,
-                        columns=['age', 'workclass', 'fnlwgt', 'education_num', 'marital_status', 'post',
-                                 'relationship', 'nation', 'gender', 'capital', 'hours_per_week',
+                        columns=['age', 'workclass', 'education_num', 'marital_status', 'post',
+                                 'relationship', 'nation', 'gender', 'capital_gain', 'capital_loss', 'hours_per_week',
                                  'country', 'wealth'])
 
     return outliers_df, main_df
@@ -80,12 +85,13 @@ def pre_processing(df: DataFrame):
     missing_data_df.to_sql(name="missing_information", con=sql_manager.conn, if_exists="replace")
     main_df = df.dropna()
     print(main_df.shape)
-    main_df["capital"] = main_df["capital_gain"] - main_df["capital_loss"]
-    main_df = main_df.drop(columns=["capital_gain", "capital_loss", 'education'])
-    main_df = main_df.reindex(columns=['age', 'workclass', 'fnlwgt', 'education_num', 'marital_status', 'post',
-                                       'relationship', 'nation', 'gender', 'capital', 'hours_per_week',
-                                       'country', 'wealth'])
+    main_df = main_df.drop(columns=['education',"fnlwgt"])
     outliers_df, main_df = drop_numerical_outliers(main_df)
+    main_df["capital"] = main_df["capital_gain"] - main_df["capital_loss"]
+    main_df = main_df.drop(columns=["capital_gain", "capital_loss" ])
+    main_df = main_df[['age', 'workclass', 'education_num', 'marital_status', 'post',
+                       'relationship', 'nation', 'gender', 'capital', 'hours_per_week',
+                       'country', 'wealth']]
     outliers_df.to_sql(name="outliers", con=SqlManager("information.sqlite").conn, if_exists="replace", index=False)
     main_df.to_sql(name="information", con=SqlManager("information.sqlite").conn, if_exists="replace", index=False)
     print(main_df.shape)
