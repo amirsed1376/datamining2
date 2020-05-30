@@ -116,7 +116,6 @@ def run_plots():
     names = ['age', 'workclass', 'education_num', 'marital_status', 'post',
              'relationship', 'nation', 'gender', 'capital', 'hours_per_week',
              'country']
-    names=["capital"]
     for col in names:
         histogram_group = 0
         if col == "capital":
