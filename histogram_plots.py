@@ -9,10 +9,10 @@ def get_information(column):
     column_value = sql_manager.crs.execute(
         'select DISTINCT {} from information ORDER BY {}'.format(column, column)).fetchall()
     low_column_count = sql_manager.crs. \
-        execute('select {}, count({}) from information  GROUP by {} having wealth="lowerCase"'
+        execute('select {}, count({}) from information where wealth="lowerCase" GROUP by {} '
                 .format(column, column, column)).fetchall()
     up_column_count = sql_manager.crs. \
-        execute('select {}, count({}) from information  GROUP by {} having wealth="upperCase"'
+        execute('select {}, count({}) from information where wealth="upperCase" GROUP by {} '
                 .format(column, column, column)).fetchall()
 
     labels = [x[0] for x in column_value]
@@ -28,45 +28,59 @@ def get_information(column):
         if i not in low_column_label:
             low_column_count.append((i, 0))
 
+
     up_column_count.sort(key=lambda x: x[0])
     low_column_count.sort(key=lambda x: x[0])
+
+    print(up_column_count)
+    print(low_column_count)
+
+
     up_count = [item[1] for item in up_column_count]
     low_count = [item[1] for item in low_column_count]
-
     return up_count, low_count, labels
 
 
 def grouping(up_count, low_count, labels, group_num):
     """grouping lists and return information of each group"""
-    print(up_count)
-    print(low_count)
-    print(labels)
-    minimum=min(labels)
-    maximum=max(labels)
-    Range=maximum-minimum
-    range_list=[]
+    # print(up_count)
+    # print(low_count)
+    # print(labels)
+    minimum = min(labels)
+    maximum = max(labels)
+    Range = maximum - minimum
+    range_list = []
     for i in range(group_num):
-        range_list.append((int(minimum+i*Range/group_num), int(minimum+(i+1)*Range/group_num)))
-    print(range_list)
-    labels_dict =dict()
+        range_list.append((int(minimum + i * Range / group_num), int(minimum + (i + 1) * Range / group_num)))
+    # print(range_list)
+    labels_dict = dict()
 
-    for r_index , r in enumerate(range_list):
-        if r_index == group_num-1:
-            range_str="{}<=x<={}".format(r[0],r[1])
+    for r_index, r in enumerate(range_list):
+        if r_index == group_num - 1:
+            range_str = "{}<=x<={}".format(r[0], r[1])
 
         else:
-            range_str="{}<=x<{}".format(r[0], r[1])
-        labels_dict[range_str] = ([],[])
-        for index , label in enumerate(labels):
-            if label in range(r[0],r[1]) or (r_index==group_num-1 and label==r[1]):
+            range_str = "{}<=x<{}".format(r[0], r[1])
+        labels_dict[range_str] = ([], [])
+        for index, label in enumerate(labels):
+            if label in range(r[0], r[1]) or (r_index == group_num - 1 and label == r[1]):
                 labels_dict[range_str][0].append(up_count[index])
                 labels_dict[range_str][1].append(low_count[index])
 
-    new_labels=[str(key) for key in labels_dict]
-    new_up_count=[sum(labels_dict[key][0]) for key in labels_dict]
-    new_low_count=[sum(labels_dict[key][1]) for key in labels_dict]
+    new_labels = [str(key) for key in labels_dict]
+    new_up_count = [sum(labels_dict[key][0]) for key in labels_dict]
+    new_low_count = [sum(labels_dict[key][1]) for key in labels_dict]
     return new_up_count, new_low_count, new_labels
 
+def autolabel(rects, ax):
+    """Attach a text label above each bar in *rects*, displaying its height."""
+    for rect in rects:
+        height = rect.get_height()
+        ax.annotate('{}'.format(height),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom')
 
 def make_plot(column, histogram_group=0):
     """
@@ -86,9 +100,9 @@ def make_plot(column, histogram_group=0):
     if histogram_group != 0:
         up_count, low_count, labels = grouping(up_count, low_count, labels, histogram_group)
         print("ok")
-    print(up_count)
-    print(low_count)
-    print(labels)
+    # print(up_count)
+    # print(low_count)
+    # print(labels)
 
     x = np.arange(len(labels)) * 100  # the label locations
     width = 30  # the width of the bars
