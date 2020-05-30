@@ -3,13 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def get_value_column(column_value):
-    labels = []
-    for item in column_value:
-        labels.append(item[0])
-    return labels
-
-
 def get_information(column):
     """this function get information of column and wealth from database and return up_count and low_count and labels"""
     sql_manager = SqlManager("information.sqlite")
@@ -22,14 +15,12 @@ def get_information(column):
         execute('select {}, count({}) from information  GROUP by {} having wealth="upperCase"'
                 .format(column, column, column)).fetchall()
 
-
     labels = [x[0] for x in column_value]
-
 
     low_column_label = [x[0] for x in low_column_count]
     up_column_label = [x[0] for x in up_column_count]
-    low_column_count=list(low_column_count)
-    up_column_count=list(up_column_count)
+    low_column_count = list(low_column_count)
+    up_column_count = list(up_column_count)
     for i in low_column_label:
         if i not in up_column_label:
             up_column_count.append((i, 0))
@@ -39,8 +30,8 @@ def get_information(column):
 
     up_column_count.sort(key=lambda x: x[0])
     low_column_count.sort(key=lambda x: x[0])
-    up_count=[item[1] for item in up_column_count]
-    low_count=[item[1] for item in low_column_count]
+    up_count = [item[1] for item in up_column_count]
+    low_count = [item[1] for item in low_column_count]
 
     return up_count, low_count, labels
 
@@ -50,19 +41,30 @@ def grouping(up_count, low_count, labels, group_num):
     print(up_count)
     print(low_count)
     print(labels)
-    new_labels = []
-    new_up_count = []
-    new_low_count = []
-    counts = len(labels)
+    minimum=min(labels)
+    maximum=max(labels)
+    Range=maximum-minimum
+    range_list=[]
     for i in range(group_num):
-        first = int(i * counts / group_num)
-        last = int((i + 1) * counts / group_num)
-        new_up_count.append(sum(up_count[first:last]))
-        new_low_count.append(sum(low_count[first:last]))
-        if i == group_num - 1:
-            new_labels.append("{}<=x<={}".format(labels[first], labels[last - 1]))
+        range_list.append((int(minimum+i*Range/group_num), int(minimum+(i+1)*Range/group_num)))
+    print(range_list)
+    labels_dict =dict()
+
+    for r_index , r in enumerate(range_list):
+        if r_index == group_num-1:
+            range_str="{}<=x<={}".format(r[0],r[1])
+
         else:
-            new_labels.append("{}<=x<{}".format(labels[first], labels[last - 1]))
+            range_str="{}<=x<{}".format(r[0], r[1])
+        labels_dict[range_str] = ([],[])
+        for index , label in enumerate(labels):
+            if label in range(r[0],r[1]) or (r_index==group_num-1 and label==r[1]):
+                labels_dict[range_str][0].append(up_count[index])
+                labels_dict[range_str][1].append(low_count[index])
+
+    new_labels=[str(key) for key in labels_dict]
+    new_up_count=[sum(labels_dict[key][0]) for key in labels_dict]
+    new_low_count=[sum(labels_dict[key][1]) for key in labels_dict]
     return new_up_count, new_low_count, new_labels
 
 
@@ -119,7 +121,7 @@ def run_plots():
     for col in names:
         histogram_group = 0
         if col == "capital":
-            histogram_group = 20
+            histogram_group = 40
         make_plot(column=col, histogram_group=histogram_group)
 
 
