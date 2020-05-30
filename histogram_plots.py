@@ -82,7 +82,7 @@ def autolabel(rects, ax):
                     textcoords="offset points",
                     ha='center', va='bottom')
 
-def make_plot(column, histogram_group=0):
+def make_plot(up_count, low_count, labels,column,address, histogram_group=0 ):
     """
         input : a column name
         outputs:
@@ -95,14 +95,9 @@ def make_plot(column, histogram_group=0):
 
         """
 
-    up_count, low_count, labels = get_information(column)
-
     if histogram_group != 0:
         up_count, low_count, labels = grouping(up_count, low_count, labels, histogram_group)
         print("ok")
-    # print(up_count)
-    # print(low_count)
-    # print(labels)
 
     x = np.arange(len(labels)) * 100  # the label locations
     width = 30  # the width of the bars
@@ -120,12 +115,15 @@ def make_plot(column, histogram_group=0):
         ax.set_xticklabels(labels)
         ax.legend()
         # plt.show()
-        plt.savefig('plots\\' + column + '__ income')
+        plt.savefig(address)
         plt.close()
         fig.tight_layout()
-        print(column, " plot finished")
+        print(address, "  finished")
     except Exception as e:
         print("EXCEPT", e)
+
+
+
 
 
 def run_plots():
@@ -136,7 +134,13 @@ def run_plots():
         histogram_group = 0
         if col == "capital":
             histogram_group = 40
-        make_plot(column=col, histogram_group=histogram_group)
+        up_count, low_count, labels = get_information(col)
+        make_plot(up_count, low_count, labels,col,'plots\\' + col + '__ income', histogram_group=histogram_group)
+        sum_up_count=sum(up_count)
+        sum_low_count=sum(low_count)
+        up_count_percent=[x/sum_up_count for x in up_count]
+        low_count_percent=[x/sum_low_count for x in low_count]
+        make_plot(up_count_percent, low_count_percent, labels,col,'plots_percent\\' + col + '__ income', histogram_group=histogram_group)
 
 
 if __name__ == '__main__':
