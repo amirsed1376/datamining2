@@ -16,36 +16,40 @@ def get_information(column):
     column_value = sql_manager.crs.execute(
         'select DISTINCT {} from information ORDER BY {}'.format(column, column)).fetchall()
     low_column_count = sql_manager.crs. \
-        execute('select {}, count({}) from information where wealth="lowerCase" GROUP by {} '
+        execute('select {}, count({}) from information  GROUP by {} having wealth="lowerCase"'
                 .format(column, column, column)).fetchall()
     up_column_count = sql_manager.crs. \
-        execute('select {}, count({}) from information where wealth="upperCase" GROUP by {} '
+        execute('select {}, count({}) from information  GROUP by {} having wealth="upperCase"'
                 .format(column, column, column)).fetchall()
-    labels = get_value_column(column_value)
 
-    low_column = [x[0] for x in low_column_count]
-    up_column = [x[0] for x in up_column_count]
 
-    for i in low_column:
-        if i not in up_column:
+    labels = [x[0] for x in column_value]
+
+
+    low_column_label = [x[0] for x in low_column_count]
+    up_column_label = [x[0] for x in up_column_count]
+    low_column_count=list(low_column_count)
+    up_column_count=list(up_column_count)
+    for i in low_column_label:
+        if i not in up_column_label:
             up_column_count.append((i, 0))
-    for i in up_column:
-        if i not in low_column:
+    for i in up_column_label:
+        if i not in low_column_label:
             low_column_count.append((i, 0))
-    up_count = []
-    low_count = []
-    for item in up_column_count:
-        up_count.append(item[1])
-    for item in low_column_count:
-        low_count.append(item[1])
+
     up_column_count.sort(key=lambda x: x[0])
     low_column_count.sort(key=lambda x: x[0])
+    up_count=[item[1] for item in up_column_count]
+    low_count=[item[1] for item in low_column_count]
 
     return up_count, low_count, labels
 
 
 def grouping(up_count, low_count, labels, group_num):
     """grouping lists and return information of each group"""
+    print(up_count)
+    print(low_count)
+    print(labels)
     new_labels = []
     new_up_count = []
     new_low_count = []
@@ -112,6 +116,7 @@ def run_plots():
     names = ['age', 'workclass', 'education_num', 'marital_status', 'post',
              'relationship', 'nation', 'gender', 'capital', 'hours_per_week',
              'country']
+    names=["capital"]
     for col in names:
         histogram_group = 0
         if col == "capital":
