@@ -28,7 +28,7 @@ def cal_accuracy(y_test, y_pred):
 
     report = classification_report(y_test, y_pred)
     print("Report : ", report)
-    accuracy_file = open("accuracy_decision_tree_report.txt", "w")
+    accuracy_file = open("outs\\accuracy_decision_tree_report.txt", "w")
     accuracy_file.write(
         "Confusion Matrix:\n{}\n\nAccuracy : \n{}\n\nReport : \n{}".format(str(confusionMatrix), str(accuracy),
                                                                            str(report)))
