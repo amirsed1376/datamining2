@@ -2,12 +2,7 @@ import pandas as pd
 from pandas.core.frame import DataFrame
 import numpy as np
 import sqlite3
-
-
-class SqlManager:
-    def __init__(self, file):
-        self.conn = sqlite3.connect(file)
-        self.crs = self.conn.cursor()
+from SqlManager import SqlManager
 
 
 def drop_numerical_outliers(input_df):
@@ -96,7 +91,7 @@ def pre_processing(df: DataFrame):
     main_df.to_sql(name="information", con=SqlManager("information.sqlite").conn, if_exists="replace", index=False)
     print(main_df.shape)
     main_df.describe().to_sql(name="describe", con=sql_manager.conn, if_exists='replace')
-    with open("dtypes.txt", "w") as file:
+    with open("outs\\dtypes.txt", "w") as file:
         file.write(str(main_df.dtypes))
     return main_df
 

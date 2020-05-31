@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib
-from preprocess import SqlManager
+from SqlManager import SqlManager
 
 
 def make_plots():
@@ -25,9 +25,8 @@ def make_plots():
             dark_number = 1-((row[2]-minimum)/(maximum-minimum))
             plt.scatter(row[0], row[1],color=(dark_number,0,0))
         plt.xticks(rotation=60)
-        plt.savefig("distribution_plots\\"+col+".png",bbox_inches='tight')
+        plt.savefig("outs\\distribution_plots\\"+col+".png",bbox_inches='tight')
         plt.close()
-        # plt.show()
 
 if __name__ == '__main__':
     make_plots()

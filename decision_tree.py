@@ -84,8 +84,11 @@ def decision_tree(X_train, y_train, column_names):
 def run_decision_tree():
     """main function of this file """
     sql_manager = SqlManager("information.sqlite")
-    sql_manager.crs.execute("delete from encoding_guide")
-    sql_manager.conn.commit()
+    try:
+        sql_manager.crs.execute("delete from encoding_guide")
+        sql_manager.conn.commit()
+    except:
+        pass
     label_encode_features = []
     columns_name = ['age', 'workclass', 'education_num', 'marital_status', 'post',
                     'relationship', 'nation', 'gender', 'capital', 'hours_per_week',

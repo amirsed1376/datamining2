@@ -1,4 +1,4 @@
-from preprocess import SqlManager
+from SqlManager import SqlManager
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -135,12 +135,12 @@ def run_plots():
         if col == "capital":
             histogram_group = 40
         up_count, low_count, labels = get_information(col)
-        make_plot(up_count, low_count, labels,col,'plots\\' + col + '__ income', histogram_group=histogram_group)
+        make_plot(up_count, low_count, labels,col,'outs\\plots\\' + col + '__ income', histogram_group=histogram_group)
         sum_up_count=sum(up_count)
         sum_low_count=sum(low_count)
         up_count_percent=[x/sum_up_count for x in up_count]
         low_count_percent=[x/sum_low_count for x in low_count]
-        make_plot(up_count_percent, low_count_percent, labels,col,'plots_percent\\' + col + '__ income', histogram_group=histogram_group)
+        make_plot(up_count_percent, low_count_percent, labels,col,'outs\\plots_percent\\' + col + '__ income', histogram_group=histogram_group)
 
 
 if __name__ == '__main__':
