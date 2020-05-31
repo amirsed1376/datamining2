@@ -123,9 +123,6 @@ def make_plot(up_count, low_count, labels,column,address, histogram_group=0 ):
         print("EXCEPT", e)
 
 
-
-
-
 def run_plots():
     names = ['age', 'workclass', 'education_num', 'marital_status', 'post',
              'relationship', 'nation', 'gender', 'capital', 'hours_per_week',

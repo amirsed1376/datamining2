@@ -9,9 +9,11 @@ from pandas.core.frame import DataFrame
 import os
 from SqlManager import SqlManager
 from sklearn import preprocessing
+from sklearn.naive_bayes import GaussianNB
 
 
-def cal_accuracy(y_test, y_pred):
+
+def cal_accuracy(y_test, y_pred, report_file):
     """
     calculate accuracy
     :param y_test: test label
@@ -28,11 +30,12 @@ def cal_accuracy(y_test, y_pred):
 
     report = classification_report(y_test, y_pred)
     print("Report : ", report)
-    accuracy_file = open("outs\\accuracy_decision_tree_report.txt", "w")
+    accuracy_file = open(report_file, "w")
     accuracy_file.write(
         "Confusion Matrix:\n{}\n\nAccuracy : \n{}\n\nReport : \n{}".format(str(confusionMatrix), str(accuracy),
                                                                            str(report)))
     accuracy_file.close()
+
 
 
 def combine_features_tuples(label_encode_features):
@@ -81,7 +84,13 @@ def decision_tree(X_train, y_train, column_names):
     return clf_gini
 
 
-def run_decision_tree():
+def gaussian(X_train, y_train):
+    gnb = GaussianNB()
+    gnb.fit(X_train, y_train)
+    return gnb
+
+
+def run_classification():
     """main function of this file """
     sql_manager = SqlManager("information.sqlite")
     try:
@@ -105,11 +114,15 @@ def run_decision_tree():
     clf = decision_tree(X_train, y_train, columns_name)
 
     y_pred_gini = clf.predict(X_test)
-    cal_accuracy(y_test, y_pred_gini)
+    cal_accuracy(y_test, y_pred_gini, "outs\\accuracy_decision_tree_report.txt")
 
     print("Results Using Entropy:")
+
+    gnb = gaussian(X_train, y_train)
+    y_pred_gaussian = gnb.predict(X_test)
+    cal_accuracy(y_test, y_pred_gaussian, "outs\\accuracy_gaussian_report.txt")
 
 
 if __name__ == "__main__":
     os.environ["PATH"] += os.pathsep + 'C:\\Users\\user\\Desktop\\graphviz-2.38\\release\\bin'
-    run_decision_tree()
+    run_classification()
