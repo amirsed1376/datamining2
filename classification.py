@@ -16,7 +16,6 @@ from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
 
 
-
 def cal_accuracy(y_test, y_pred, report_file):
     """
     calculate accuracy
@@ -188,11 +187,12 @@ def run_classification():
     print("random_forest finish")
 
     # make accuracy plot and table
-    classifications=["","decision_tree","gaussian","Bernoulli","SVC","random_forest"]
-    accuracy_df = DataFrame({"classification_name":classifications , "accuracy":accuracy_list})
-    accuracy_df.to_sql(name="accuracies",con=sql_manager.conn,if_exists="replace")
-    plt.bar(classifications,accuracy_list)
+    classifications = ["", "decision_tree", "gaussian", "Bernoulli", "SVC", "random_forest"]
+    accuracy_df = DataFrame({"classification_name": classifications, "accuracy": accuracy_list})
+    accuracy_df.to_sql(name="accuracies", con=sql_manager.conn, if_exists="replace")
+    plt.bar(classifications, accuracy_list)
     plt.savefig("outs\\accuracy_plot.png")
+
 
 if __name__ == "__main__":
     os.environ["PATH"] += os.pathsep + 'C:\\Users\\user\\Desktop\\graphviz-2.38\\release\\bin'
