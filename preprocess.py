@@ -5,7 +5,7 @@ import sqlite3
 from SqlManager import SqlManager
 
 
-def drop_numerical_outliers(input_df):
+def drop_numerical_outliers(input_df ):
     """
     inputs: a data frame
     outputs: outliers data frame and clean data
@@ -23,8 +23,11 @@ def drop_numerical_outliers(input_df):
             Q3 = df.quantile(0.75)
             IQR = Q3 - Q1
             if IQR == 0:
-                continue
-            trueList = ~((df < (Q1 - 1.5 * IQR)) | (df > (Q3 + 1.5 * IQR)))
+                #means capitals
+                # 99999
+                trueList = ~(df > 41311)
+            else:
+                trueList = ~((df < (Q1 - 1.5 * IQR)) | (df > (Q3 + 1.5 * IQR)))
             for index, is_ok in enumerate(trueList.values.tolist()):
                 if not is_ok:
                     outliers_index.add(index)
