@@ -10,6 +10,10 @@ import os
 from SqlManager import SqlManager
 from sklearn import preprocessing
 from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+from sklearn.naive_bayes import BernoulliNB
+from sklearn.ensemble import RandomForestClassifier
+import matplotlib.pyplot as plt
 
 
 
@@ -35,7 +39,7 @@ def cal_accuracy(y_test, y_pred, report_file):
         "Confusion Matrix:\n{}\n\nAccuracy : \n{}\n\nReport : \n{}".format(str(confusionMatrix), str(accuracy),
                                                                            str(report)))
     accuracy_file.close()
-
+    return accuracy
 
 
 def combine_features_tuples(label_encode_features):
@@ -90,6 +94,36 @@ def gaussian(X_train, y_train):
     return gnb
 
 
+def svc(X_train, y_train):
+    svclassifier = SVC(gamma='auto')
+    svclassifier.fit(X_train, y_train)
+    return svclassifier
+
+
+def bernoulli(X_train, y_train):
+    clf = BernoulliNB()
+    clf.fit(X_train, y_train)
+    return clf
+
+
+def random_forest(X_train, y_train):
+    clf = RandomForestClassifier(max_depth=2, random_state=0)
+    clf.fit(X_train, y_train)
+    return clf
+
+
+def predict_save(x_test, y_test, y_predict, classification_type, conn):
+    # print(type(x_test))
+    columns_names = ['age', 'workclass', 'education_num', 'marital_status', 'post',
+                     'relationship', 'nation', 'gender', 'capital', 'hours_per_week',
+                     'country']
+    save_list = x_test.copy()
+    df = DataFrame(save_list, columns=columns_names)
+    df["y"] = y_test
+    df["y_predict"] = y_predict
+    df.to_sql(name=classification_type + "_predict", con=conn, if_exists="replace")
+
+
 def run_classification():
     """main function of this file """
     sql_manager = SqlManager("information.sqlite")
@@ -110,18 +144,55 @@ def run_classification():
     target = label_encode('wealth')
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.3,
                                                         random_state=1)
+    accuracy_list = [0]
 
+    # decision tree algorithm
     clf = decision_tree(X_train, y_train, columns_name)
-
     y_pred_gini = clf.predict(X_test)
-    cal_accuracy(y_test, y_pred_gini, "outs\\accuracy_decision_tree_report.txt")
+    accuracy = cal_accuracy(y_test, y_pred_gini, "outs\\accuracy_decision_tree_report.txt")
+    accuracy_list.append(accuracy)
+    predict_save(x_test=X_test, y_test=y_test, y_predict=y_pred_gini, classification_type="decision_tree",
+                 conn=sql_manager.conn)
+    print("decision_tree finish")
 
-    print("Results Using Entropy:")
-
+    # gaussian algorithm
     gnb = gaussian(X_train, y_train)
     y_pred_gaussian = gnb.predict(X_test)
-    cal_accuracy(y_test, y_pred_gaussian, "outs\\accuracy_gaussian_report.txt")
+    accuracy = cal_accuracy(y_test, y_pred_gaussian, "outs\\accuracy_gaussian_report.txt")
+    accuracy_list.append(accuracy)
+    predict_save(X_test, y_test, y_pred_gaussian, "gaussian", sql_manager.conn)
+    print("gaussian finish")
 
+    # bernoulli algorithm
+    clf = bernoulli(X_train, y_train)
+    y_pred_bernoulli = clf.predict(X_test)
+    accuracy = cal_accuracy(y_test, y_pred_bernoulli, report_file="outs\\accuracy_Bernoulli_report.txt")
+    accuracy_list.append(accuracy)
+    predict_save(X_test, y_test, y_pred_bernoulli, "Bernoulli", sql_manager.conn)
+    print("bernoulli finish")
+
+    # svc algorithm
+    svclassifier = svc(X_train, y_train)
+    y_pred_SVC = svclassifier.predict(X_test)
+    accuracy = cal_accuracy(y_test, y_pred_SVC, report_file="outs\\accuracy_SVC_report.txt")
+    accuracy_list.append(accuracy)
+    predict_save(X_test, y_test, y_pred_SVC, "SVC", sql_manager.conn)
+    print("SVC finish")
+
+    # random_forest algorithm
+    clf = random_forest(X_train, y_train)
+    y_pred_random_forest = clf.predict(X_test)
+    accuracy = cal_accuracy(y_test, y_pred_random_forest, report_file="outs\\accuracy_random_forest_report.txt")
+    accuracy_list.append(accuracy)
+    predict_save(X_test, y_test, y_pred_random_forest, "random_forest", sql_manager.conn)
+    print("random_forest finish")
+
+    # make accuracy plot and table
+    classifications=["","decision_tree","gaussian","Bernoulli","SVC","random_forest"]
+    accuracy_df = DataFrame({"classification_name":classifications , "accuracy":accuracy_list})
+    accuracy_df.to_sql(name="accuracies",con=sql_manager.conn,if_exists="replace")
+    plt.bar(classifications,accuracy_list)
+    plt.savefig("outs\\accuracy_plot.png")
 
 if __name__ == "__main__":
     os.environ["PATH"] += os.pathsep + 'C:\\Users\\user\\Desktop\\graphviz-2.38\\release\\bin'
