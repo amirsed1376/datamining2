@@ -3,6 +3,8 @@ from pandas.core.frame import DataFrame
 from SqlManager import SqlManager
 from classification import label_encode, combine_features_tuples
 import matplotlib.pyplot as plt
+import seaborn as sn
+
 
 if __name__ == '__main__':
 
@@ -51,3 +53,10 @@ if __name__ == '__main__':
 
         plt.savefig("outs\\pie_plots\\{}.png".format(col))
         plt.close()
+
+    corrMatrix = df.corr()
+
+    sn.heatmap(corrMatrix, annot=True)
+    plt.show()
+    # plt.savefig("outs\\corr_table.pdf",dpi=400)
+    plt.close()

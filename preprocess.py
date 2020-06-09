@@ -1,7 +1,6 @@
 import pandas as pd
 from pandas.core.frame import DataFrame
 import numpy as np
-import sqlite3
 from SqlManager import SqlManager
 
 
